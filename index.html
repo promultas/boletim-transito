@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Boletim de Trânsito</title>
+<style>
+  :root {
+    --azul: #1F4E79;
+    --azul-medio: #2E75B6;
+    --azul-claro: #D6E4F0;
+    --verde: #1A7A4A;
+    --verde-claro: #D4EDDA;
+    --amarelo: #856404;
+    --amarelo-claro: #FFF3CD;
+    --vermelho: #721C24;
+    --vermelho-claro: #F8D7DA;
+    --cinza: #6c757d;
+    --cinza-claro: #f8f9fa;
+    --branco: #ffffff;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Segoe UI', Arial, sans-serif; background: #eef2f7; color: #222; min-height: 100vh; }
+  header { background: var(--azul); color: var(--branco); padding: 32px 40px 24px; border-bottom: 4px solid var(--azul-medio); }
+  header h1 { font-size: 1.7rem; font-weight: 700; letter-spacing: 0.5px; }
+  header .subtitulo { font-size: 0.95rem; opacity: 0.8; margin-top: 6px; }
+  header .meta { margin-top: 14px; display: flex; gap: 20px; flex-wrap: wrap; }
+  header .meta span { background: rgba(255,255,255,0.15); border-radius: 20px; padding: 4px 14px; font-size: 0.82rem; }
+  .container { max-width: 960px; margin: 0 auto; padding: 32px 20px 60px; }
+  .resumo-executivo { background: var(--branco); border-left: 5px solid var(--azul-medio); border-radius: 8px; padding: 22px 26px; margin-bottom: 32px; box-shadow: 0 2px 8px rgba(0,0,0,0.07); }
+  .resumo-executivo h2 { color: var(--azul); font-size: 1rem; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 12px; }
+  .resumo-executivo ul { padding-left: 18px; }
+  .resumo-executivo li { margin-bottom: 8px; font-size: 0.95rem; line-height: 1.5; }
+  .secao { margin-bottom: 36px; }
+  .secao-titulo { display: flex; align-items: center; gap: 10px; font-size: 0.85rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1.5px; color: var(--azul); border-bottom: 2px solid var(--azul-claro); padding-bottom: 10px; margin-bottom: 16px; }
+  .secao-titulo .icone { width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.9rem; background: var(--azul-claro); color: var(--azul); flex-shrink: 0; }
+  .card { background: var(--branco); border-radius: 10px; padding: 20px 22px; margin-bottom: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); border-left: 5px solid var(--azul-medio); transition: box-shadow 0.2s; }
+  .card:hover { box-shadow: 0 4px 16px rgba(0,0,0,0.12); }
+  .card.jurisprudencia { border-left-color: #6f42c1; }
+  .card.contran { border-left-color: var(--azul-medio); }
+  .card.administrativo { border-left-color: #fd7e14; }
+  .card-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; margin-bottom: 10px; }
+  .card-numero { font-weight: 700; color: var(--azul); font-size: 1rem; }
+  .badges { display: flex; gap: 6px; flex-wrap: wrap; flex-shrink: 0; }
+  .badge { font-size: 0.72rem; font-weight: 700; padding: 3px 10px; border-radius: 20px; text-transform: uppercase; letter-spacing: 0.5px; }
+  .badge-novo { background: var(--verde-claro); color: var(--verde); }
+  .badge-atencao { background: var(--amarelo-claro); color: var(--amarelo); }
+  .badge-urgente { background: var(--vermelho-claro); color: var(--vermelho); }
+  .badge-vigor { background: var(--azul-claro); color: var(--azul); }
+  .card-ementa { font-size: 0.92rem; color: #444; line-height: 1.55; margin-bottom: 10px; }
+  .card-meta { display: flex; gap: 16px; flex-wrap: wrap; font-size: 0.8rem; color: var(--cinza); margin-bottom: 10px; }
+  .card-impacto { background: var(--cinza-claro); border-radius: 6px; padding: 10px 14px; font-size: 0.85rem; color: #333; line-height: 1.5; margin-bottom: 10px; }
+  .card-impacto strong { color: var(--azul); }
+  .card-link a { color: var(--azul-medio); font-size: 0.82rem; text-decoration: none; font-weight: 600; }
+  .card-link a:hover { text-decoration: underline; }
+  .sem-novidade { background: var(--cinza-claro); border-radius: 8px; padding: 16px 20px; color: var(--cinza); font-size: 0.9rem; text-align: center; }
+  .agenda { background: var(--branco); border-radius: 10px; padding: 22px 26px; box-shadow: 0 2px 8px rgba(0,0,0,0.07); margin-bottom: 32px; }
+  .agenda table { width: 100%; border-collapse: collapse; margin-top: 12px; font-size: 0.88rem; }
+  .agenda th { background: var(--azul); color: var(--branco); padding: 8px 12px; text-align: left; }
+  .agenda td { padding: 8px 12px; border-bottom: 1px solid #e9ecef; }
+  .agenda tr:last-child td { border-bottom: none; }
+  .agenda tr:hover td { background: var(--azul-claro); }
+  .fontes { background: var(--branco); border-radius: 10px; padding: 22px 26px; box-shadow: 0 2px 8px rgba(0,0,0,0.07); }
+  .fontes h2 { color: var(--azul); font-size: 0.85rem; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 12px; }
+  .fontes ul { padding-left: 18px; }
+  .fontes li { margin-bottom: 6px; font-size: 0.85rem; }
+  .fontes a { color: var(--azul-medio); }
+  footer { text-align: center; padding: 24px; color: var(--cinza); font-size: 0.78rem; background: var(--branco); border-top: 1px solid #e9ecef; margin-top: 20px; }
+  @media (max-width: 600px) { header { padding: 20px; } .container { padding: 20px 12px 40px; } .card-header { flex-direction: column; } }
+</style>
+</head>
+<body>
+<header>
+  <h1>&#9878;&#65039; Boletim de Trânsito</h1>
+  <div class="subtitulo">Atualização Legislativa e Jurisprudencial — Direito de Trânsito Brasileiro</div>
+  <div class="meta">
+    <span>&#128197; Semana de 10 a 17/05/2026</span>
+    <span>&#128197; Gerado em 17/05/2026</span>
+    <span>&#128204; 5 itens encontrados</span>
+  </div>
+</header>
+<div class="container">
+
+  <div class="resumo-executivo">
+    <h2>Resumo Executivo</h2>
+    <ul>
+      <li><strong>Renovação automática da CNH aprovada (PLV 3/2026):</strong> O Senado Federal aprovou em 12/05/2026 o projeto de lei de conversão da MP 1.327/2025, que permite renovação automática para condutores cadastrados no RNPC sem infrações pontuáveis nos últimos 12 meses. O texto aguarda sanção presidencial — impacto imediato para clientes com histórico limpo.</li>
+      <li><strong>Deliberação CONTRAN nº 277/2026 — Free Flow:</strong> Publicada em 28/04/2026, suspendeu 3,4 milhões de multas do pedágio eletrônico Free Flow. Motoristas têm até 16/11/2026 para regularizar tarifas em aberto sem multa nem pontos na CNH. Oportunidade estratégica para clientes com autuações de free flow.</li>
+      <li><strong>Resolução CONTRAN nº 1.020/2025 — Formação de Condutores em vigor:</strong> Implementação plena em 2026 da resolução que extinguiu a obrigatoriedade de autoescola e reduziu carga horária mínima prática para 2 horas. Gera impacto no contencioso de cassação de CNH por formação irregular.</li>
+      <li><strong>TRF3 condena União a indenizar proprietário de caminhão clonado (maio/2026):</strong> A Quarta Turma do TRF3 fixou R$ 10.000 em danos morais por falha do Estado ao vistoriar veículo apreendido com clonagem evidente. Reforça tese de responsabilidade objetiva do Estado — argumento aplicável em casos de clientes com veículos clonados e perdimento indevido.</li>
+      <li><strong>Câmbio automático na prova de CNH — PL em tramitação:</strong> Comissão da Câmara aprovou projeto que inclui conteúdo sobre câmbio automático nos exames teóricos da CNH. Ainda depende de CCJ, Senado e sanção — acompanhar evolução para clientes em processo de habilitação.</li>
+    </ul>
+  </div>
+
+  <!-- SEÇÃO 1: LEGISLAÇÃO FEDERAL -->
+  <div class="secao">
+    <div class="secao-titulo"><div class="icone">&#9878;&#65039;</div>Legislação Federal</div>
+
+    <div class="card">
+      <div class="card-header">
+        <div class="card-numero">PLV 3/2026 — Conversão da MP 1.327/2025</div>
+        <div class="badges">
+          <span class="badge badge-novo">Novo</span>
+          <span class="badge badge-atencao">Aguarda Sanção</span>
+        </div>
+      </div>
+      <div class="card-ementa">
+        Altera a Lei nº 9.503/1997 (CTB) para instituir a renovação automática da Carteira Nacional de Habilitação (CNH) para condutores inscritos no Registro Nacional Positivo de Condutores (RNPC) que não tenham cometido infrações sujeitas a pontuação nos últimos 12 meses. Prevê ainda a emissão da CNH em formato físico, digital ou ambos, a critério do condutor, e unifica o valor dos exames de aptidão física, mental e psicológica com base em tabela nacional definida pela Senatran, atualizada anualmente pelo IPCA.
+      </div>
+      <div class="card-meta">
+        <span>&#128197; Aprovado pelo Senado: 12/05/2026</span>
+        <span>&#128203; Categoria: LEGISLAÇÃO</span>
+        <span>&#128338; Situação: Aguardando Sanção Presidencial</span>
+      </div>
+      <div class="card-impacto">
+        <strong>&#128161; Impacto prático:</strong> Clientes inscritos no RNPC sem infrações pontuáveis em 12 meses poderão renovar a CNH sem deslocamento ao Detran, mantendo apenas a obrigação dos exames médicos e psicológicos. Motoristas com 70 anos ou mais e aqueles com prazo de renovação reduzido por recomendação médica continuam obrigados ao processo presencial. Para condutores entre 50 e 69 anos, o benefício pode ser usado somente uma vez.
+        <br><br>
+        <strong>&#9888;&#65039; Atenção:</strong> Restrições de elegibilidade devem ser checadas caso a caso — o benefício não se aplica automaticamente a todos os clientes.
+      </div>
+      <div class="card-link">
+        <a href="https://www12.senado.leg.br/noticias/materias/2026/05/12/aprovada-pelo-senado-mp-da-renovacao-automatica-da-cnh-para-bons-condutores" target="_blank">&#128279; Senado Federal — Notícia oficial (12/05/2026)</a>
+        &nbsp;|&nbsp;
+        <a href="https://www.planalto.gov.br/ccivil_03/_ato2023-2026/2025/mpv/mpv1327.htm" target="_blank">&#128279; Texto da MP 1.327/2025 no Planalto</a>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <div class="card-numero">PL — Câmbio Automático na Prova Teórica da CNH</div>
+        <div class="badges">
+          <span class="badge badge-atencao">Em tramitação</span>
+        </div>
+      </div>
+      <div class="card-ementa">
+        Projeto de lei aprovado pela Comissão de Viação e Transportes da Câmara dos Deputados que inclui obrigatoriamente noções sobre câmbio automático no conteúdo teórico dos exames para obtenção da CNH. Candidato que fizer prova prática em veículo com câmbio automático terá restrição na habilitação para condução de veículos com câmbio manual.
+      </div>
+      <div class="card-meta">
+        <span>&#128197; Aprovado na comissão: início de maio/2026</span>
+        <span>&#128203; Categoria: LEGISLAÇÃO</span>
+        <span>&#128338; Situação: Tramitação — falta CCJ, Senado e sanção</span>
+      </div>
+      <div class="card-impacto">
+        <strong>&#128161; Impacto prático:</strong> Quando aprovado, mudará o escopo dos exames teóricos e práticos, com implicações para candidatos à CNH e para processos de cassação baseados em tipo de câmbio utilizado na habilitação.
+        <br><br>
+        <strong>&#9888;&#65039; Atenção:</strong> Ainda não é lei — acompanhar evolução para orientar clientes em processo de obtenção da habilitação.
+      </div>
+      <div class="card-link">
+        <a href="https://www.camara.leg.br/noticias/1264668-comissao-aprova-inclusao-de-nocoes-do-uso-de-cambio-automatico-na-prova-de-carteira-de-motorista" target="_blank">&#128279; Câmara dos Deputados — Notícia oficial</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- SEÇÃO 2: RESOLUÇÕES CONTRAN -->
+  <div class="secao">
+    <div class="secao-titulo"><div class="icone">&#128678;</div>Resoluções CONTRAN</div>
+
+    <div class="card contran">
+      <div class="card-header">
+        <div class="card-numero">Deliberação CONTRAN nº 277/2026 — Free Flow</div>
+        <div class="badges">
+          <span class="badge badge-novo">Novo</span>
+          <span class="badge badge-vigor">Em Vigor</span>
+        </div>
+      </div>
+      <div class="card-ementa">
+        Suspende temporariamente 3,4 milhões de multas aplicadas no sistema de pedágio eletrônico Free Flow em rodovias federais e estaduais. A deliberação, publicada em 28/04/2026, concede prazo de 200 dias (até 16/11/2026) para que motoristas regularizem tarifas em aberto sem incidência de multa (R$ 195,23) e sem lançamento de 5 pontos na CNH. O pagamento do pedágio continua obrigatório — apenas a penalidade por inadimplência está suspensa.
+      </div>
+      <div class="card-meta">
+        <span>&#128197; Publicação: 28/04/2026</span>
+        <span>&#128203; Categoria: CONTRAN</span>
+        <span>&#128338; Prazo final: 16/11/2026</span>
+      </div>
+      <div class="card-impacto">
+        <strong>&#128161; Impacto prático:</strong> Clientes com multas pendentes de pedágio free flow devem ser orientados a regularizar os débitos até 16/11/2026 para evitar o retorno automático das multas e pontos. As concessionárias têm 100 dias para integrar os sistemas ao aplicativo CNH do Brasil, o que facilitará o pagamento digital.
+        <br><br>
+        <strong>&#128161; Oportunidade:</strong> Recursos contra autuações de free flow anteriores à deliberação podem ser contestados — verificar validade dos autos de infração em aberto.
+      </div>
+      <div class="card-link">
+        <a href="https://www.gov.br/secom/pt-br/acompanhe-a-secom/noticias/2026/04/governo-do-brasil-suspende-mais-de-3-milhoes-de-multas-do-free-flow-e-da-a-motoristas-200-dias-para-pagar-tarifas-vencidas" target="_blank">&#128279; Secom/Gov.br — Nota oficial</a>
+        &nbsp;|&nbsp;
+        <a href="https://clickpetroleoegas.com.br/o-contran-suspendeu-34-milhoes-de-multas-do-pedagio-eletronico-free-flow-no-brasil-os-motoristas-tem-ate-16-de-novembro-de-2026-btl96/" target="_blank">&#128279; Detalhes da Deliberação 277/2026</a>
+      </div>
+    </div>
+
+    <div class="card contran">
+      <div class="card-header">
+        <div class="card-numero">Resolução CONTRAN nº 1.020/2025 — Formação de Condutores</div>
+        <div class="badges">
+          <span class="badge badge-vigor">Em Vigor — 2026</span>
+        </div>
+      </div>
+      <div class="card-ementa">
+        Publicada em 09/12/2025 (data da resolução: 01/12/2025). Normatiza integralmente os procedimentos de aprendizagem, habilitação e expedição de documentos de condutores. Principais alterações em plena vigência em 2026: extinção da obrigatoriedade de frequência em autoescola para realização dos exames; redução da carga horária mínima de aulas práticas para 2 horas (categorias A e B); e novos critérios objetivos para cancelamento automático da CNH em caso de penalidades específicas.
+      </div>
+      <div class="card-meta">
+        <span>&#128197; Publicação: 09/12/2025</span>
+        <span>&#128203; Categoria: CONTRAN</span>
+        <span>&#128338; Situação: Em vigor — implementação plena em 2026</span>
+      </div>
+      <div class="card-impacto">
+        <strong>&#128161; Impacto prático:</strong> A extinção da obrigatoriedade de autoescola pode gerar novos questionamentos sobre a regularidade de habilitações obtidas sob o regime anterior e futuros processos de cassação. O critério de cancelamento automático de CNH é relevante para defesas administrativas e recursos junto ao CETRAN.
+        <br><br>
+        <strong>&#9888;&#65039; Atenção:</strong> A ausência de período de transição formal tem gerado insegurança jurídica — monitorar decisões dos Detrans estaduais sobre adequação ao novo modelo.
+      </div>
+      <div class="card-link">
+        <a href="https://www.gov.br/transportes/pt-br/assuntos/transito/conteudo-contran/resolucoes/Resolucao10202025.pdf" target="_blank">&#128279; Texto oficial da Resolução 1.020/2025 (PDF)</a>
+        &nbsp;|&nbsp;
+        <a href="https://www.detran.rs.gov.br/cnh-do-brasil-publicacao-da-resolucao-contran-n-1020-e-suas-implicacoes-no-processo-de-formacao-de-condutores-no-rs" target="_blank">&#128279; DetranRS — Análise das implicações</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- SEÇÃO 3: ATOS ADMINISTRATIVOS -->
+  <div class="secao">
+    <div class="secao-titulo"><div class="icone">&#128203;</div>Atos Administrativos</div>
+    <div class="sem-novidade">Nenhuma portaria ou instrução normativa da Senatran publicada no período de 10 a 17/05/2026 identificada com repercussão relevante para o contencioso de trânsito. As portarias mais recentes verificadas datam de fevereiro/2026 (Portarias Senatran nº 93, 100 e 104/2026). Monitorar o Diário Oficial da União na próxima semana.</div>
+  </div>
+
+  <!-- SEÇÃO 4: JURISPRUDÊNCIA -->
+  <div class="secao">
+    <div class="secao-titulo"><div class="icone">&#127963;&#65039;</div>Jurisprudência — TRF / STJ</div>
+
+    <div class="card jurisprudencia">
+      <div class="card-header">
+        <div class="card-numero">TRF3 — 4ª Turma — Indenização por Caminhão Clonado / Perdimento Indevido</div>
+        <div class="badges">
+          <span class="badge badge-novo">Novo</span>
+          <span class="badge badge-vigor">Publicado Mai/2026</span>
+        </div>
+      </div>
+      <div class="card-ementa">
+        A Quarta Turma do Tribunal Regional Federal da 3ª Região condenou a União Federal ao pagamento de R$ 10.000,00 a título de danos morais em favor de proprietário de caminhão que teve seu veículo clonado e, em razão de falha do Estado na vistoria do bem apreendido, sofreu a restrição e o perdimento do veículo original. O relator, Desembargador Marcelo Saraiva, aplicou a responsabilidade civil objetiva do Estado (art. 37, §6º, CF/88), asseverando que "não se verifica qualquer sofisticação da clonagem como impeditivo do seu reconhecimento, sendo atribuição da administração pública vistoriar" as irregularidades.
+      </div>
+      <div class="card-meta">
+        <span>&#128197; Publicado: maio/2026 (noticiado em 08/05/2026)</span>
+        <span>&#128203; Categoria: JURISPRUDÊNCIA</span>
+        <span>&#127963;&#65039; Tribunal: TRF3 — 4ª Turma</span>
+        <span>&#128279; Relator: Des. Marcelo Saraiva</span>
+      </div>
+      <div class="card-impacto">
+        <strong>&#128161; Impacto prático:</strong> Decisão reforça a tese de responsabilidade objetiva do Estado em casos de clonagem de veículos com falha administrativa — aplicável em demandas de clientes que sofreram perdimento ou restrição indevida de veículos clonados. O fundamento dispensa prova de dolo ou culpa do agente público, bastando demonstrar a conduta estatal, o dano e o nexo causal.
+        <br><br>
+        <strong>&#128161; Oportunidade:</strong> Clientes com veículos clonados e restrições administrativas indevidas têm precedente recente favorável no TRF3 para ajuizar ação indenizatória contra a União ou o DETRAN estadual.
+      </div>
+      <div class="card-link">
+        <a href="https://blogdocaminhoneiro.com/2026/05/proprietario-que-teve-caminhao-clonado-e-sofreu-perdimento-do-veiculo-sera-indenizado-pela-uniao/" target="_blank">&#128279; Blog do Caminhoneiro — Notícia (08/05/2026)</a>
+      </div>
+    </div>
+
+    <div class="card jurisprudencia">
+      <div class="card-header">
+        <div class="card-numero">STJ — Tema Repetitivo 1097 — Dupla Notificação em Multas a Pessoas Jurídicas</div>
+        <div class="badges">
+          <span class="badge badge-vigor">Em vigor</span>
+        </div>
+      </div>
+      <div class="card-ementa">
+        O STJ fixou, no Tema Repetitivo 1097 (publicado em 10/11/2025, com aplicação consolidada em 2026), que em multas aplicadas a pessoas jurídicas proprietárias de veículo por não indicação do condutor infrator, é obrigatória a observância da dupla notificação: (i) notificação de autuação e (ii) notificação de aplicação da penalidade, nos termos dos arts. 280, 281 e 282 do CTB. A ausência de qualquer das notificações gera nulidade da autuação.
+      </div>
+      <div class="card-meta">
+        <span>&#128197; Publicação STJ: 10/11/2025 — Aplicação em curso em 2026</span>
+        <span>&#128203; Categoria: JURISPRUDÊNCIA</span>
+        <span>&#127963;&#65039; Tribunal: STJ</span>
+      </div>
+      <div class="card-impacto">
+        <strong>&#128161; Impacto prático:</strong> Clientes pessoas jurídicas (frotas, locadoras, transportadoras) com multas por não indicação do condutor devem ter suas autuações revisadas à luz do Tema 1097. A falta da dupla notificação é causa de nulidade formal — argumento a ser levantado em primeira instância administrativa (JARI) e, se necessário, em mandado de segurança.
+      </div>
+      <div class="card-link">
+        <a href="https://www.jusbrasil.com.br/jurisprudencia/busca?q=tema+repetitivo+1097+STJ+transito" target="_blank">&#128279; Jusbrasil — Busca de jurisprudência</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- AGENDA DE PRAZOS -->
+  <div class="agenda">
+    <div class="secao-titulo" style="border-bottom:none;padding-bottom:0;margin-bottom:0;"><div class="icone">&#128198;</div>Agenda de Prazos</div>
+    <table>
+      <thead><tr><th>Data</th><th>Evento / Prazo</th><th>Norma</th></tr></thead>
+      <tbody>
+        <tr>
+          <td><strong>Aguardando</strong></td>
+          <td>Sanção presidencial da PLV 3/2026 (renovação automática CNH)</td>
+          <td>PLV 3/2026 / MP 1.327/2025</td>
+        </tr>
+        <tr>
+          <td><strong>16/11/2026</strong></td>
+          <td>Prazo final para regularização de tarifas Free Flow — após esta data, retornam multas (R$ 195,23) e 5 pontos na CNH</td>
+          <td>Deliberação CONTRAN 277/2026</td>
+        </tr>
+        <tr>
+          <td><strong>28/07/2026</strong></td>
+          <td>Prazo de 100 dias para concessionárias integrarem sistemas ao app CNH do Brasil (Free Flow)</td>
+          <td>Deliberação CONTRAN 277/2026</td>
+        </tr>
+        <tr>
+          <td><strong>Contínuo</strong></td>
+          <td>Implementação da Resolução CONTRAN 1.020/2025 pelos Detrans estaduais — monitorar portarias locais</td>
+          <td>Resolução CONTRAN 1.020/2025</td>
+        </tr>
+        <tr>
+          <td><strong>A definir</strong></td>
+          <td>Tramitação do PL sobre câmbio automático na CNH — análise pela CCJ da Câmara</td>
+          <td>PL em tramitação na Câmara</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- FONTES -->
+  <div class="fontes">
+    <h2>Fontes Consultadas</h2>
+    <ul>
+      <li><a href="https://www.planalto.gov.br" target="_blank">Planalto — Portal da Legislação (MP 1.327/2025)</a></li>
+      <li><a href="https://www.gov.br/transportes/pt-br/assuntos/transito/conteudo-Senatran/resolucoes-contran" target="_blank">CONTRAN / Ministério dos Transportes — Resoluções</a></li>
+      <li><a href="https://www.gov.br/transportes/pt-br/assuntos/transito/conteudo-contran/resolucoes/Resolucao10202025.pdf" target="_blank">Resolução CONTRAN nº 1.020/2025 (PDF oficial)</a></li>
+      <li><a href="https://www.in.gov.br" target="_blank">Diário Oficial da União</a></li>
+      <li><a href="https://www12.senado.leg.br/noticias/materias/2026/05/12/aprovada-pelo-senado-mp-da-renovacao-automatica-da-cnh-para-bons-condutores" target="_blank">Senado Federal — Aprovação PLV 3/2026 (12/05/2026)</a></li>
+      <li><a href="https://www12.senado.leg.br/institucional/presidencia/noticia/semi-destaques/renovacao-automatica-da-cnh-e-certificacao-de-armazens-para-guarda-de-insumos-vao-a-sancao-presidencial" target="_blank">Senado Federal — Sanção presidencial (PLV 3/2026)</a></li>
+      <li><a href="https://www.camara.leg.br/noticias/1264668-comissao-aprova-inclusao-de-nocoes-do-uso-de-cambio-automatico-na-prova-de-carteira-de-motorista" target="_blank">Câmara dos Deputados — PL Câmbio Automático CNH</a></li>
+      <li><a href="https://scon.stj.jus.br/SCON/" target="_blank">STJ — Jurisprudência (Tema 1097)</a></li>
+      <li><a href="https://www.gov.br/secom/pt-br/acompanhe-a-secom/noticias/2026/04/governo-do-brasil-suspende-mais-de-3-milhoes-de-multas-do-free-flow-e-da-a-motoristas-200-dias-para-pagar-tarifas-vencidas" target="_blank">Secom/Gov.br — Deliberação CONTRAN 277/2026 Free Flow</a></li>
+      <li><a href="https://blogdocaminhoneiro.com/2026/05/proprietario-que-teve-caminhao-clonado-e-sofreu-perdimento-do-veiculo-sera-indenizado-pela-uniao/" target="_blank">TRF3 — Decisão clonagem de veículo (mai/2026)</a></li>
+    </ul>
+  </div>
+
+</div>
+<footer>Boletim gerado automaticamente &middot; Escritório Promultas &middot; Direito de Trânsito Brasileiro &middot; 17/05/2026</footer>
+</body>
+</html>
